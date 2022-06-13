@@ -12,14 +12,11 @@ def main():
 
         seed = []
         # 1 - TransactionID atual
-        transactionID = lista[0]
+        transactionID = int(lista[0])
 
         # 2 - Challenge(desafio) associada ao transactionID atual;
-        challenger = lista[1]
+        challenger = int(lista[1])
 
-        transactionID = int(transactionID)
-
-        challenger = int(challenger)
         # 3 - Buscar, localmente, uma seed (semente) que solucione o desafio proposto
         flag = True
 
@@ -94,13 +91,15 @@ def main():
         lista = body.decode().split('/')
 
         # 1 - TransactionID atual
-        transactionID = lista[0]
+        transactionID = int(lista[0])
 
         # 2 - ClientID associada ao transactionID atual;
-        clientID = lista[1]
+        clientID = int(lista[1])
 
         # 3 - Seed associada ao transactionID atual;
-        seed = lista[2]
+        seed = str(lista[2])
+
+        print(transactionID, clientID, seed)
 
     connection = pika.BlockingConnection(pika.ConnectionParameters(host = 'localhost'))
     channel = connection.channel()
@@ -110,7 +109,7 @@ def main():
     channel.queue_declare(queue = 'ppd/result')     #assina
 
     channel.basic_consume(queue = 'ppd/challenge' , on_message_callback = callback, auto_ack = True)
-    #channel.basic_consume(queue = 'ppd/result' , on_message_callback = callback2, auto_ack = True)
+    channel.basic_consume(queue = 'ppd/result' , on_message_callback = callback2, auto_ack = True)
 
     print('Waiting for messages. To exit press CRTL+C')
 

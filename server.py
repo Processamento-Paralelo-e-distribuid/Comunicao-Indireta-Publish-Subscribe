@@ -28,17 +28,22 @@ def getChallenge(transactionID, df):
     else:
         return -1
 
-def callback(ch, method, proprerties, body):        #seed
-    print("Received %r" % body.decode())
-    lista = body.decode().split('/')
-
-    clientID = lista[0]
-    transactionID = lista[1]
-    seed = lista[2]
-    
-    #channel.basic_publish(exchange = '', routing_key = 'ppd/result', body = 'result')
 
 def main():
+
+    def callback(ch, method, proprerties, body):        #seed
+        print("Received %r" % body.decode())
+        lista = body.decode().split('/')
+
+        clientID = int(lista[0])
+        transactionID = int(lista[1])
+        seed = str(lista[2])
+        print(clientID, transactionID, seed)
+        
+        cod_result = str(transactionID) + '/' + str(clientID) + '/' + seed
+        
+        print(cod_result)
+        channel.basic_publish(exchange = '', routing_key = 'ppd/result', body = cod_result)
 
     lista = {"TransactionID":[0], "Challenge":[random.randint(1,5)], "Seed":[" "], "Winner": [-1]}
     df = pd.DataFrame(lista)
