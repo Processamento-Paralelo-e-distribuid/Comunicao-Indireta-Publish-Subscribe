@@ -3,7 +3,17 @@ import pika, sys, os
 import pandas as pd
 import random
 
-def getTransactionID(df):
+global arquivo 
+arquivo = 'banco-de-dados.csv'
+def getTransactionID():
+    try:
+        df = pd.read_csv(arquivo)
+        print("Arquivo encontrado")
+    except:
+        print("Criando Banco de dados")
+        df = None
+    transactionID = 0
+        
     if(df is None):
         lista = {"TransactionID":[0], "Challenge":[random.randint(1,5)], "Seed":[" "], "Winner": [-1]}
         df = pd.DataFrame(lista)
@@ -18,9 +28,15 @@ def getTransactionID(df):
 
             df = pd.concat([df,transaction], ignore_index = True)
     
-    return transactionID
+    df.to_csv(arquivo, index=False)
+    
+    return int(transactionID)
 
-def getChallenge(transactionID, df):
+def getChallenge(transactionID):
+    try:
+        df = pd.read_csv(arquivo)
+    except:
+        return -1
     transaction = df.query("TransactionID ==" + str(transactionID))
 
     if(transaction.empty==False):
@@ -43,17 +59,16 @@ def main():
         cod_result = str(transactionID) + '/' + str(clientID) + '/' + seed
         
         channel.basic_publish(exchange = '', routing_key = 'ppd/result', body = cod_result)
-
-    lista = {"TransactionID":[0], "Challenge":[random.randint(1,5)], "Seed":[" "], "Winner": [-1]}
-    df = pd.DataFrame(lista)
-
-    print(df)
     
-    transaction = getTransactionID(df)
-    challenge = getChallenge(transaction, df)
-    cod_challenge = str(transaction) + '/' + str(challenge)
-
-    print(cod_challenge)
+    transactionID = getTransactionID()
+    while True:
+        challenge = getChallenge(transactionID)
+        if(challenge != -1):
+            break
+        else:
+            transactionID = getTransactionID()
+    
+    cod_challenge = str(transactionID) + '/' + str(challenge)
 
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
     channel = connection.channel()
