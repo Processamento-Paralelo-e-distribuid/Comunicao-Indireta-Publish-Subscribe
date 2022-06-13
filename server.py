@@ -1,13 +1,11 @@
+from multiprocessing.connection import Client
 import pika, sys, os
 import pandas as pd
 import random
 
-def callback(ch, method, proprerties, body):        #seed
-    print("Received %r" % body.decode())
-
 def getTransactionID(df):
     if(df is None):
-        lista = {"TransactionID":[0], "Challenge":[random.randint(1,129)], "Seed":[" "], "Winner": [-1]}
+        lista = {"TransactionID":[0], "Challenge":[random.randint(1,5)], "Seed":[" "], "Winner": [-1]}
         df = pd.DataFrame(lista)
     else:
         tam = len(df.iloc[:, 0])
@@ -15,7 +13,7 @@ def getTransactionID(df):
             return df.iloc[tam-1, 0]
         else:
             transactionID = df.iloc[(tam-1), 0]+1
-            lista = {"TransactionID":[0], "Challenge":[random.randint(1,129)], "Seed":[" "], "Winner": [-1]}
+            lista = {"TransactionID":[0], "Challenge":[random.randint(1,5)], "Seed":[" "], "Winner": [-1]}
             transaction = pd.DataFrame(lista)
 
             df = pd.concat([df,transaction], ignore_index = True)
@@ -30,9 +28,19 @@ def getChallenge(transactionID, df):
     else:
         return -1
 
+def callback(ch, method, proprerties, body):        #seed
+    print("Received %r" % body.decode())
+    lista = body.decode().split('/')
+
+    clientID = lista[0]
+    transactionID = lista[1]
+    seed = lista[2]
+    
+    #channel.basic_publish(exchange = '', routing_key = 'ppd/result', body = 'result')
+
 def main():
 
-    lista = {"TransactionID":[0], "Challenge":[random.randint(1,129)], "Seed":[" "], "Winner": [-1]}
+    lista = {"TransactionID":[0], "Challenge":[random.randint(1,5)], "Seed":[" "], "Winner": [-1]}
     df = pd.DataFrame(lista)
 
     print(df)
@@ -52,7 +60,6 @@ def main():
 
     channel.basic_consume(queue = 'ppd/seed', on_message_callback = callback, auto_ack = True)
     channel.basic_publish(exchange = '', routing_key = 'ppd/challenge', body = cod_challenge)
-    #channel.basic_publish(exchange = '', routing_key = 'ppd/result', body = 'result')
 
     channel.start_consuming()
 
