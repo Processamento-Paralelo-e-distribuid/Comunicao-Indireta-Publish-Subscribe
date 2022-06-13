@@ -42,7 +42,6 @@ def main():
         
         cod_result = str(transactionID) + '/' + str(clientID) + '/' + seed
         
-        print(cod_result)
         channel.basic_publish(exchange = '', routing_key = 'ppd/result', body = cod_result)
 
     lista = {"TransactionID":[0], "Challenge":[random.randint(1,5)], "Seed":[" "], "Winner": [-1]}
