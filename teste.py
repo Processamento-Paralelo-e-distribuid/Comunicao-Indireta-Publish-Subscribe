@@ -9,7 +9,9 @@ arquivo = 'banco-de-dados.csv'
 def getTransactionID():
     try:
         df = pd.read_csv(arquivo)
+        print("Arquivo encontrado")
     except:
+        print("Criando Banco de dados")
         df = None
     transactionID = 0
         
@@ -18,14 +20,14 @@ def getTransactionID():
         df = pd.DataFrame(lista)
     else:
         tam = len(df.iloc[:, 0])
-        if(df.iloc[tam-1, 3] == -1):
+        if(df.iloc[tam-1, 3]):
             return int(df.iloc[tam-1, 0])
         else:
             transactionID = df.iloc[(tam-1), 0]+1
             lista = {"TransactionID":[transactionID], "Challenge":[random.randint(1,5)], "Seed":[" "], "Winner": [-1]}
             transaction = pd.DataFrame(lista)
-
-            df = pd.concat([df, transaction], ignore_index = True)
+            
+            df = pd.concat([df,transaction], ignore_index = True)
     
     df.to_csv(arquivo, index=False)
     
@@ -60,6 +62,8 @@ def submitChallenge(transactionID, ClientID, seed):
     hash = sha1(texto).hexdigest()
     
     challenge = trasition["Challenge"].values[0]
+    
+    
     if(True):
         trasition.loc[transactionID,"Seed"]   = str(seed)
         trasition.loc[transactionID,"Winner"] = ClientID
@@ -69,7 +73,6 @@ def submitChallenge(transactionID, ClientID, seed):
         return 1
     else:
         return 0
-
 def main():
 
     def callback(ch, method, proprerties, body):        #seed
@@ -84,22 +87,21 @@ def main():
         cod_result = str(transactionID) + '/' + str(clientID) + '/' + seed
         
         resposta = submitChallenge(transactionID, clientID, seed)
+        
         transactionID = getTransactionID()
+        print(transactionID)
         while True:
             challenge = getChallenge(transactionID)
             if(challenge != -1):
                 break
             else:
                 transactionID = getTransactionID()
+        
         cod_challenge = str(transactionID) + '/' + str(challenge)
-        print(cod_result + '--1')
-        print(cod_challenge + '--2')
         channel.basic_publish(exchange = '', routing_key = 'ppd/result', body = cod_result)
         channel.basic_publish(exchange = '', routing_key = 'ppd/challenge', body = cod_challenge)
     transactionID = getTransactionID()
-
-        
-    while True:    
+    while True:
         challenge = getChallenge(transactionID)
         if(challenge != -1):
             break
@@ -122,7 +124,7 @@ def main():
 
     connection.close()
 
-if __name__ == '__main__':
+if __name__ == '_main_':
     try:
         main()
     except KeyboardInterrupt:
