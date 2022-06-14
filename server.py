@@ -43,6 +43,30 @@ def getChallenge(transactionID):
     else:
         return -1
 
+def verificaSEED(hash, challenger):
+    for i in range(0,40):
+        ini_string = hash[i]
+        scale = 16
+        res = bin(int(ini_string, scale)).zfill(4)
+        res = str(res)
+        
+        for k in range(len(res)):
+            if(res[k] == "b"):
+                res = "0"*(4-len(res[k+1:]))+res[k+1:]
+                break
+        
+        for j in range (0, 4):
+            if(challenger == 0):
+                if(res[j] != "0"):
+                    return 1
+                else:
+                    return -1
+            if(res[j] == "0"):
+                challenger = challenger - 1
+            else:
+                return -1
+    return -1
+
 def submitChallenge(transactionID, ClientID, seed):
     try:
         df = pd.read_csv(arquivo)
@@ -58,9 +82,8 @@ def submitChallenge(transactionID, ClientID, seed):
     
     texto = str(seed).encode('utf-8')
     hash = sha1(texto).hexdigest()
-    
     challenge = trasition["Challenge"].values[0]
-    if(True):
+    if(verificaSEED(hash, challenge) == 1):
         trasition.loc[transactionID,"Seed"]   = str(seed)
         trasition.loc[transactionID,"Winner"] = ClientID
         df.iloc[transactionID,:] = trasition.iloc[0,:]
@@ -79,7 +102,6 @@ def main():
         clientID = int(lista[0])
         transactionID = int(lista[1])
         seed = str(lista[2])
-        print(clientID, transactionID, seed)
         
         cod_result = str(transactionID) + '/' + str(clientID) + '/' + seed
         
@@ -92,9 +114,13 @@ def main():
             else:
                 transactionID = getTransactionID()
         cod_challenge = str(transactionID) + '/' + str(challenge)
-        print(cod_result + '--1')
-        print(cod_challenge + '--2')
-        channel.basic_publish(exchange = '', routing_key = 'ppd/result', body = cod_result)
+        
+        if(resposta == 1):
+            df = pd.read_csv(arquivo)
+            channel.basic_publish(exchange = '', routing_key = 'ppd/result', body = cod_result)
+            print(df)
+
+            
         channel.basic_publish(exchange = '', routing_key = 'ppd/challenge', body = cod_challenge)
     transactionID = getTransactionID()
 
