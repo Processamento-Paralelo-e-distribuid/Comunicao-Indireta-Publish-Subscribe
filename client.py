@@ -7,7 +7,6 @@ from hashlib import sha1
 def main():
     
     def callback(ch, method, properties, body):     #challenge
-        print("Received %r" % body.decode())
         lista = body.decode().split('/')
 
         seed = []
@@ -99,7 +98,6 @@ def main():
         
     
     def callback2(ch, method, properties, body):    #result
-        print("Received %r" % body.decode())
         lista = body.decode().split('/')
 
         # 1 - TransactionID atual

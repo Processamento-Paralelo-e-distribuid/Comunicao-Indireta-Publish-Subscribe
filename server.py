@@ -14,7 +14,7 @@ def getTransactionID():
     transactionID = 0
         
     if(df is None):
-        lista = {"TransactionID":[0], "Challenge":[random.randint(1,5)], "Seed":[" "], "Winner": [-1]}
+        lista = {"TransactionID":[0], "Challenge":[1], "Seed":[" "], "Winner": [-1]}
         df = pd.DataFrame(lista)
     else:
         tam = len(df.iloc[:, 0])
@@ -22,7 +22,8 @@ def getTransactionID():
             return int(df.iloc[tam-1, 0])
         else:
             transactionID = df.iloc[(tam-1), 0]+1
-            lista = {"TransactionID":[transactionID], "Challenge":[random.randint(1,5)], "Seed":[" "], "Winner": [-1]}
+            challenge = transactionID+1
+            lista = {"TransactionID":[transactionID], "Challenge":[challenge], "Seed":[" "], "Winner": [-1]}
             transaction = pd.DataFrame(lista)
 
             df = pd.concat([df, transaction], ignore_index = True)
@@ -83,7 +84,7 @@ def submitChallenge(transactionID, ClientID, seed):
     texto = str(seed).encode('utf-8')
     hash = sha1(texto).hexdigest()
     challenge = trasition["Challenge"].values[0]
-    
+
     if(verificaSEED(hash, challenge) == 1):
         trasition.loc[transactionID,"Seed"]   = str(seed)
         trasition.loc[transactionID,"Winner"] = ClientID
@@ -97,7 +98,6 @@ def submitChallenge(transactionID, ClientID, seed):
 def main():
 
     def callback(ch, method, proprerties, body):        #seed
-        print("Received %r" % body.decode())
         lista = body.decode().split('/')
 
         clientID = int(lista[0])
