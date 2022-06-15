@@ -36,7 +36,7 @@ def main():
                     if(res[k] == "b"):
                         res = "0"*(4-len(res[k+1:]))+res[k+1:]
                         break
-                    
+
                 for j in range (0, 4):
                     if(challenger == 0):
                         if(res[j] != "0"):
@@ -94,7 +94,7 @@ def main():
         ClientID = int(input("| Digite o ID do cliente: "))
         
         #enviar resposta para server
-        cod_seed = str(ClientID)+'/'+str(transactionID)+'/'+str(seed)
+        cod_seed = str(ClientID)+'/'+str(transactionID)+'/'+str(seed[0])
         channel.basic_publish(exchange = '', routing_key = 'ppd/seed', body = cod_seed)
         
     
