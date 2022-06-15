@@ -36,8 +36,7 @@ def main():
                     if(res[k] == "b"):
                         res = "0"*(4-len(res[k+1:]))+res[k+1:]
                         break
-                print(res)
-                
+                    
                 for j in range (0, 4):
                     if(challenger == 0):
                         if(res[j] != "0"):

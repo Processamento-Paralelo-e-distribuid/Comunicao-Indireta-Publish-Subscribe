@@ -80,7 +80,7 @@ def submitChallenge(transactionID, ClientID, seed):
     elif(trasition["Winner"].values != -1):
         return 2
     
-    texto = str(seed).encode('utf-8')
+    texto = str(seed[0]).encode('utf-8')
     hash = sha1(texto).hexdigest()
     challenge = trasition["Challenge"].values[0]
     if(verificaSEED(hash, challenge) == 1):
