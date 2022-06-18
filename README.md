@@ -27,6 +27,7 @@ A vantagem deste sistema e que:
 Melhor desempenho
 ### **Local**
  [1] - Acesse a pasta onde estão localisados os arquivos do servidor e do cliente
+ 
  [2] - Execute o servidor utilizando o comando logo abaixo:
 ```
 pyrhon3 serve.py
@@ -37,7 +38,9 @@ python3 cliente.py
 ```
 ### **Remoto** 
 Altere em ambos os arquivos o localhost para o IP ao qual sera conectado o Broker
+ 
  [1] - Acesse a pasta onde estão localizados os arquivos do servidor e do cliente
+ 
  [2] - Execute o servidor utilizando o comando logo abaixo:
 ```
 pyrhon3 serve.py
