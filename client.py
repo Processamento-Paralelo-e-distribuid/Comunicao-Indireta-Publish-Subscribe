@@ -7,7 +7,6 @@ from hashlib import sha1
 def main():
     
     def callback(ch, method, properties, body):     #challenge
-        print("Received %r" % body.decode())
         lista = body.decode().split('/')
 
         seed = []
@@ -25,10 +24,34 @@ def main():
         
         text = "| Procurando seed ..."
         print(text)
-        
+
+        def verificaSEED(hash, challenger):
+            for i in range(0,40):
+                ini_string = hash[i]
+                scale = 16
+                res = bin(int(ini_string, scale)).zfill(4)
+                res = str(res)
+                for k in range(len(res)):
+                    if(res[k] == "b"):
+                        res = "0"*(4-len(res[k+1:]))+res[k+1:]
+                        break
+
+                for j in range (0, 4):
+                    if(challenger == 0):
+                        if(res[j] != "0"):
+                            return 1
+                        else:
+                            return -1
+                    if(res[j] == "0"):
+                        challenger = challenger - 1
+                    else:
+                        return -1
+            return -1
+
         def random_generator(size=6, n=1, chars=string.printable): # Gera string aleatória
             random.seed(n)
             return ''.join(random.choice(chars) for _ in range(size))
+
         def getSeed(challenger, seed, size): # Gera seed
             n = 0
             while(flag):
@@ -36,7 +59,7 @@ def main():
                 texto = str(seedTemp).encode('utf-8')
                 hash = sha1(texto).hexdigest()
                 
-                if(hash[0:challenger] == "0"*challenger and hash[challenger] != "0"):
+                if(verificaSEED(hash, challenger) == 1):
                     seed.append(seedTemp)
                     break
                 n = n + 1
@@ -70,24 +93,11 @@ def main():
         ClientID = int(input("| Digite o ID do cliente: "))
         
         #enviar resposta para server
-        cod_seed = str(ClientID)+'/'+str(transactionID)+'/'+str(seed)
+        cod_seed = str(ClientID)+'/'+str(transactionID)+'/'+str(seed[0])
         channel.basic_publish(exchange = '', routing_key = 'ppd/seed', body = cod_seed)
         
-        # 6 - Imprime e decodfica resposta do servidor.
-        """ text = ""
-        if(resposta == -1):
-            text = "| ID da transação invalido"
-        elif(resposta == 0):
-            text = "| A seed passada é invalida, logo não resolve o desafio"
-        elif(resposta == 1):
-            text = "| A seed passada é valida"
-        elif(resposta == 2):
-            text = "| O desafio já foi solucionado"
-        print(text)
-     """
     
     def callback2(ch, method, properties, body):    #result
-        print("Received %r" % body.decode())
         lista = body.decode().split('/')
 
         # 1 - TransactionID atual
